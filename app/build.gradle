@@ -1,0 +1,122 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 30
+    flavorDimensions "mode", "type"
+
+    defaultConfig {
+        applicationId "com.dgs.multires"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    productFlavors {
+
+        multires {
+            applicationId "com.dgs.multires"
+            dimension "mode"
+        }
+
+        pad {
+            //配置横竖屏参数
+            addManifestPlaceholders([screenOrientation: "landscape"])
+            applicationIdSuffix ".pad"
+            dimension "type"
+        }
+
+        phone {
+            addManifestPlaceholders([screenOrientation: "portrait"])
+            applicationIdSuffix ".phone"
+            dimension "type"
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+        phone {
+            java.srcDirs('src/phone/java')
+            res.srcDir('src/phone/res')
+            manifest.srcFile('src/phone/AndroidManifest.xml')
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    buildTypes {
+
+        debug {
+            matchingFallbacks = ['release']
+            buildConfigField("String", "envType", "\"debug\"")
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            matchingFallbacks = ['debug']
+            buildConfigField("String", "envType", "\"release\"")
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    configurations {
+        cleanedAnnotations
+        compile.exclude group: 'org.jetbrains', module: 'annotations'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+        lintConfig file("../lint.xml")
+    }
+
+    //在apk文件后边生成版本号信息
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                output ->
+                    def fileName
+                    if (buildType.name == 'release') {
+                        fileName = "正式版"
+                    } else if (buildType.name == 'debug') {
+                        fileName = "开发版"
+                    }
+
+                    def formattedDate = new Date().format('yyyyMMddHHmmss')
+                    def outFile = output.outputFile
+                    def appName
+                    if (variant.name.startsWith("multiresPhone")) {
+                        appName = "手机版";
+                    } else if (variant.name.startsWith("multiresPad")) {
+                        appName = "平板版";
+                    }
+                    if (outFile != null && outFile.name.endsWith('.apk')) {
+//                        output.outputFileName = appName + "_" + fileName + "_${defaultConfig.versionCode}_" + "v${defaultConfig.versionName}_${formattedDate}.apk"
+                    }
+            }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+}
