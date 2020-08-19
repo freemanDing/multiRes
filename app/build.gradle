@@ -17,11 +17,24 @@ android {
 
     productFlavors {
 
+        //不同项目
+
+        //项目1
         multires {
             applicationId "com.dgs.multires"
             dimension "mode"
+//            addManifestPlaceholders([APPLICATION: "com.commonrail.mft.decoder"])
+//            addManifestPlaceholders([appName: "@string/app_name_decoder"])
+//            addManifestPlaceholders([appLogo: "@mipmap/app_logo_decoder"])
+        }
+        //项目2
+        multires2 {
+            applicationId "com.dgs.multires2"
+            dimension "mode"
         }
 
+
+        //不同平台
         pad {
             //配置横竖屏参数
             addManifestPlaceholders([screenOrientation: "landscape"])
@@ -37,9 +50,12 @@ android {
     }
 
     sourceSets {
+        //默认 main 为平板资源
         main {
             jniLibs.srcDirs = ['libs']
         }
+
+        //手机平台资源
         phone {
             java.srcDirs('src/phone/java')
             res.srcDir('src/phone/res')
